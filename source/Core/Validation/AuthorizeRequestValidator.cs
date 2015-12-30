@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
+using IdentityModel;
+using IdentityServer3.Core.Configuration;
+using IdentityServer3.Core.Configuration.Hosting;
+using IdentityServer3.Core.Extensions;
+using IdentityServer3.Core.Logging;
+using IdentityServer3.Core.Models;
+using IdentityServer3.Core.Services;
 using System;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Thinktecture.IdentityModel;
-using Thinktecture.IdentityServer.Core.Configuration;
-using Thinktecture.IdentityServer.Core.Configuration.Hosting;
-using Thinktecture.IdentityServer.Core.Extensions;
-using Thinktecture.IdentityServer.Core.Logging;
-using Thinktecture.IdentityServer.Core.Models;
-using Thinktecture.IdentityServer.Core.Services;
 
-namespace Thinktecture.IdentityServer.Core.Validation
+namespace IdentityServer3.Core.Validation
 {
     internal class AuthorizeRequestValidator
     {
@@ -115,7 +115,7 @@ namespace Thinktecture.IdentityServer.Core.Validation
             // client_id must be present
             /////////////////////////////////////////////////////////
             var clientId = request.Raw.Get(Constants.AuthorizeRequest.ClientId);
-            if (clientId.IsMissingOrTooLong(Constants.MaxClientIdLength))
+            if (clientId.IsMissingOrTooLong(_options.InputLengthRestrictions.ClientId))
             {
                 LogError("client_id is missing or too long", request);
                 return Invalid(request);
@@ -129,7 +129,7 @@ namespace Thinktecture.IdentityServer.Core.Validation
             //////////////////////////////////////////////////////////
             var redirectUri = request.Raw.Get(Constants.AuthorizeRequest.RedirectUri);
 
-            if (redirectUri.IsMissingOrTooLong(Constants.MaxRedirectUriLength))
+            if (redirectUri.IsMissingOrTooLong(_options.InputLengthRestrictions.RedirectUri))
             {
                 LogError("redirect_uri is missing or too long", request);
                 return Invalid(request);
@@ -269,7 +269,7 @@ namespace Thinktecture.IdentityServer.Core.Validation
                 return Invalid(request, ErrorTypes.Client);
             }
 
-            if (scope.Length > Constants.MaxScopeLength)
+            if (scope.Length > _options.InputLengthRestrictions.Scope)
             {
                 LogError("scopes too long.", request);
                 return Invalid(request, ErrorTypes.Client);
@@ -344,7 +344,7 @@ namespace Thinktecture.IdentityServer.Core.Validation
             var nonce = request.Raw.Get(Constants.AuthorizeRequest.Nonce);
             if (nonce.IsPresent())
             {
-                if (nonce.Length > Constants.MaxNonceLength)
+                if (nonce.Length > _options.InputLengthRestrictions.Nonce)
                 {
                     LogError("Nonce too long", request);
                     return Invalid(request, ErrorTypes.Client);
@@ -389,7 +389,7 @@ namespace Thinktecture.IdentityServer.Core.Validation
             var uilocales = request.Raw.Get(Constants.AuthorizeRequest.UiLocales);
             if (uilocales.IsPresent())
             {
-                if (uilocales.Length > Constants.MaxUiLocaleLength)
+                if (uilocales.Length > _options.InputLengthRestrictions.UiLocale)
                 {
                     LogError("UI locale too long", request);
                     return Invalid(request, ErrorTypes.Client);
@@ -444,7 +444,7 @@ namespace Thinktecture.IdentityServer.Core.Validation
             var loginHint = request.Raw.Get(Constants.AuthorizeRequest.LoginHint);
             if (loginHint.IsPresent())
             {
-                if (loginHint.Length > Constants.MaxLoginHintLength)
+                if (loginHint.Length > _options.InputLengthRestrictions.LoginHint)
                 {
                     LogError("Login hint too long", request);
                     return Invalid(request, ErrorTypes.Client);
@@ -459,7 +459,7 @@ namespace Thinktecture.IdentityServer.Core.Validation
             var acrValues = request.Raw.Get(Constants.AuthorizeRequest.AcrValues);
             if (acrValues.IsPresent())
             {
-                if (acrValues.Length > Constants.MaxAcrValuesLength)
+                if (acrValues.Length > _options.InputLengthRestrictions.AcrValues)
                 {
                     LogError("Acr values too long", request);
                     return Invalid(request, ErrorTypes.Client);

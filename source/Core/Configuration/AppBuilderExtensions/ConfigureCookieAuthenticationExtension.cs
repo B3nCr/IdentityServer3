@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+using IdentityServer3.Core;
+using IdentityServer3.Core.Configuration;
+using IdentityServer3.Core.Configuration.Hosting;
+using IdentityServer3.Core.Extensions;
 using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.DataHandler;
 using System;
-using Thinktecture.IdentityServer.Core;
-using Thinktecture.IdentityServer.Core.Configuration;
-using Thinktecture.IdentityServer.Core.Configuration.Hosting;
-using Thinktecture.IdentityServer.Core.Extensions;
 
 namespace Owin
 {
@@ -44,7 +44,8 @@ namespace Owin
                 ExpireTimeSpan = options.ExpireTimeSpan,
                 SlidingExpiration = options.SlidingExpiration,
                 CookieSecure = GetCookieSecure(options.SecureMode),
-                TicketDataFormat = new TicketDataFormat(new DataProtectorAdapter(dataProtector, options.Prefix + Constants.PrimaryAuthenticationType))
+                TicketDataFormat = new TicketDataFormat(new DataProtectorAdapter(dataProtector, options.Prefix + Constants.PrimaryAuthenticationType)),
+                SessionStore = GetSessionStore(options.SessionStoreProvider)
             };
             app.UseCookieAuthentication(primary);
 
@@ -115,6 +116,11 @@ namespace Owin
                 default:
                     throw new InvalidOperationException("Invalid CookieSecureMode");
             }
+        }
+
+        private static IAuthenticationSessionStore GetSessionStore(IAuthenticationSessionStoreProvider provider)
+        {
+            return provider != null ? new AuthenticationSessionStoreWrapper(provider) : null;
         }
     }
 }
